@@ -1,6 +1,6 @@
 """
-Part 01 – Object-Oriented Programming
-Exercise 01 – Class Fundamentals
+Parte 1: Classes Python
+1. Exercício 1: Fundamentos de Classes
 """
 class Agente():
     def __init__(self, nome=""):
