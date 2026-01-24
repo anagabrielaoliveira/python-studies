@@ -13,10 +13,10 @@ class Agente():
         self.estado_atual = "executando"
 
     def finalizar(self):
-        self.estado_atual="concluido"
+        self.estado_atual="concluído"
     
     def mostrar_info(self):
-        print(self.nome, self.estado_atual, self.historico)
+        print("Nome:", self.nome, "|", "Estado:", self.estado_atual, "|","Ações realizadas:", len(self.historico))
 
 agente1 = Agente("Explorador")
 agente1.executar_acao("buscar_dados")
