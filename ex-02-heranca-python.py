@@ -163,10 +163,10 @@ class AgenteFiltro(AgenteBase):
         self.tipo = "filtro"
 
     def processar(self, dados: list):
-        self.historico = dados
-        resultado1 = [dados for dados in self.historico if dados % 2 == 0]
+        resultado1 = [item for item in dados if item % 2 == 0]
+        self.historico.append(resultado1)
         return resultado1
-
+    
 class AgenteTransformador(AgenteBase):
     """
     - tipo = "transformador"
@@ -177,15 +177,16 @@ class AgenteTransformador(AgenteBase):
         super().__init__(nome) 
         self.tipo = "transformador"
 
-    def processar(self, dados: list):
-        self.historico = dados 
-        resultado2 = dados * 2 
-        return resultado2 
+    def processar(self, dados: list): 
+        resultado2 = [item*2 for item in dados]
+        self.historico.append(resultado2)
+        return resultado2
 
 
 # --- Processamento com os agentes ---
-
+"""
 dados = [1, 2, 3, 4, 5, 6]
+
 
 filtro = AgenteFiltro("FiltroNumeros")
 transformador = AgenteTransformador("Duplicador")
@@ -197,5 +198,16 @@ print(f"Resultado: {resultado1}")
 resultado2 = transformador.processar(resultado1)
 print(transformador)
 print(f"Resultado: {resultado2}")
+"""
+if __name__ == "__main__":
+    filtro = AgenteTransformador("FiltroNumeros")
+    dados = [1, 2, 3, 4, 5, 6]
+    dados_2 = [7, 8, 9, 10]
 
-# Já que meu atributo de instância self.historico está nas 2 classes filhas, não teria como definir ele no pai?
+    resultado1 = filtro.processar(dados)
+    resultado2 = filtro.processar(dados_2)
+
+    print(filtro)
+    print(f"Resultado 1: {resultado1}")
+    print(f"Resultado 2: {resultado2}")
+    print(f"Histórico: {filtro.historico}")
