@@ -1,7 +1,8 @@
 """
 Parte 1: Classes Python
-1. Exercício 1: Fundamentos de Classes
+Exercício 1: Fundamentos de Classes
 """
+
 class Agente():
     def __init__(self, nome=""):
         self.nome = nome
