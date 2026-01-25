@@ -1,7 +1,7 @@
 """
 Parte 1: Classes Python
 Exercício 1: Fundamentos de Classes
-"""
+""" 
 
 class Agente():
     def __init__(self, nome=""):
@@ -26,8 +26,8 @@ agente1.mostrar_info()
 agente1.finalizar()
 agente1.mostrar_info()
 
-# O método mostrar_info print nome (Explorador), o estado atual, de acordo com o método
-# utilizado, e o histórico, que é uma lista de strings passada com o método executar_acao.
+# O método mostrar_info printa o nome (Explorador); o estado atual, de acordo com o método
+# utilizado; e o histórico, que é uma lista de strings passada com o método executar_acao.
 
 
 
