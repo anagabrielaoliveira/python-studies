@@ -49,7 +49,7 @@ se for usado excessivamente ou se houver muitos níveis de aninhamento
 herança; exige trabalho adicional para garantir que diferentes componentes sigam a 
 mesma interface (ex: usando typing.Protocol) 
 """
-
+"""
 from typing import Protocol
 
 # Separar os comportamentos em classes menores e "montar" o robô injetando esses
@@ -98,7 +98,7 @@ drone = Robo(tarefa=Voo())
 print("--- Upgrade de hardware ---")
 limpador.tarefa = Voo() 
 limpador.ligar() 
-
+"""
 
 """
 
@@ -142,6 +142,7 @@ Classe Estado:
 Atributos: dados (any), mensagens (list)
 Método adicionar_mensagem(msg: str) que retorna self
 Método atualizar_dados(novos_dados) que retorna self
+---
 Classe Pipeline:
 
 Atributo: agentes (lista de agentes)
@@ -151,9 +152,100 @@ Método executar(): executa processar() de cada agente sequencialmente, atualiza
 Teste seu código:
 """
 
+from abc import ABC, abstractmethod
 
+class AgenteBase(ABC):
+    """
+    Classe base Agente Base
+    - Atributos: nome, tipo, historico
+    - Método __str__ que retorna "Agente {nome} ({tipo})"
+    - Método abstrato processar(dados) que apenas adiciona ao histórico
+    """
 
+    def __init__(self, nome: str): # aqui o nome é a única coisa essencial que precisa passar ao criar o objeto
+        self.nome = nome
+        self.tipo = ""
+        self.historico = []
 
+    def __str__ (self):
+        return f"Agente {self.nome} ({self.tipo})"
+
+    @abstractmethod
+    def processar(self, dados:list):
+        pass
+        """ Um método abstrato serve para dizer que as classes filhas 
+        são obrigadas a criar a sua própria versão desse métodos.
+        O método abstrato não deve ter lógica, ou seja, apenas define que o método
+        deve existir, mas não diz como ele funciona"""
+
+class AgenteFiltro(AgenteBase):
+    """
+    - tipo = "filtro"
+    - processar(dados:list): retorna apenas números pares da lista
+    """
+
+    def __init__(self, nome): 
+        super().__init__(nome) 
+        self.tipo = "filtro"
+
+    def processar(self, dados: list):
+        resultado1 = [item for item in dados if item % 2 == 0]
+        self.historico.append(resultado1)
+        return resultado1
+    
+class AgenteTransformador(AgenteBase):
+    """
+    - tipo = "transformador"
+    - processar(dados:list): retorna cada número multiplicado por 2    
+    """
+
+    def __init__(self, nome): 
+        super().__init__(nome) 
+        self.tipo = "transformador"
+
+    def processar(self, dados: list): 
+        resultado2 = [item*2 for item in dados]
+        self.historico.append(resultado2)
+        return resultado2
+
+# ----------------------------- #
+
+class Estado:
+    """
+    O papel dessa classe é centralizar tudo que muda durante a execução
+    Ele carrega os dados atuais
+    O histórico, inclusive de mensagens
+    O que for mudar ao longo do caminho
+    """
+    def __init__(self): 
+        self.dados = any
+        self.mensagens = [] 
+
+    def adicionar_mensagem(self, msg: str):
+        self.mensagens.append(msg) # adiciona a mensagem
+        return self # encadeamento  ok 
+    
+    def atualizar_dados(self, novos_dados):
+        self.dados = novos_dados # atualiza meus dados
+        return self # encadeamento  ok 
+
+class Pipeline:
+    def __init__(self, dados_iniciais): 
+        self.agentes = [] # lista de agentes
+        self.estado = Estado() # recebe a instância
+        self.estado.dados = dados_iniciais # quando o Pipeline nasce ele começa com esses dados dentro do estado
+
+    def adicionar_agente(self, agente: AgenteBase): # recebe a instancia Agente
+        self.agentes.append(agente) 
+
+    def executar(self): # executa processar() de cada agente sequencialmente
+        for item in self.agentes: # para cada agente eu vou processar a instância Estado
+            nova_lista = item.processar(self.estado.dados)
+            self.estado.atualizar_dados(nova_lista) # usa o método do estado
+            self.estado.adicionar_mensagem(
+                f"{item.nome} processou os dados"
+            ) # usa o método do estado
+        return self.estado 
 
 from typing import List
 
@@ -163,5 +255,6 @@ pipeline.adicionar_agente(AgenteFiltro("Filtro1"))
 pipeline.adicionar_agente(AgenteTransformador("Transformador1"))
 
 resultado = pipeline.executar()
+
 print(f"Dados finais: {resultado.dados}")
 print(f"Mensagens: {resultado.mensagens}")
