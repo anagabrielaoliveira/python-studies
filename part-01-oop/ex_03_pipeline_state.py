@@ -152,63 +152,7 @@ Método executar(): executa processar() de cada agente sequencialmente, atualiza
 Teste seu código:
 """
 
-from abc import ABC, abstractmethod
-
-class AgenteBase(ABC):
-    """
-    Classe base Agente Base
-    - Atributos: nome, tipo, historico
-    - Método __str__ que retorna "Agente {nome} ({tipo})"
-    - Método abstrato processar(dados) que apenas adiciona ao histórico
-    """
-
-    def __init__(self, nome: str): # aqui o nome é a única coisa essencial que precisa passar ao criar o objeto
-        self.nome = nome
-        self.tipo = ""
-        self.historico = []
-
-    def __str__ (self):
-        return f"Agente {self.nome} ({self.tipo})"
-
-    @abstractmethod
-    def processar(self, dados:list):
-        pass
-        """ Um método abstrato serve para dizer que as classes filhas 
-        são obrigadas a criar a sua própria versão desse métodos.
-        O método abstrato não deve ter lógica, ou seja, apenas define que o método
-        deve existir, mas não diz como ele funciona"""
-
-class AgenteFiltro(AgenteBase):
-    """
-    - tipo = "filtro"
-    - processar(dados:list): retorna apenas números pares da lista
-    """
-
-    def __init__(self, nome): 
-        super().__init__(nome) 
-        self.tipo = "filtro"
-
-    def processar(self, dados: list):
-        resultado1 = [item for item in dados if item % 2 == 0]
-        self.historico.append(resultado1)
-        return resultado1
-    
-class AgenteTransformador(AgenteBase):
-    """
-    - tipo = "transformador"
-    - processar(dados:list): retorna cada número multiplicado por 2    
-    """
-
-    def __init__(self, nome): 
-        super().__init__(nome) 
-        self.tipo = "transformador"
-
-    def processar(self, dados: list): 
-        resultado2 = [item*2 for item in dados]
-        self.historico.append(resultado2)
-        return resultado2
-
-# -----------    ------------------ #
+from ex_02_heranca import AgenteBase, AgenteFiltro, AgenteTransformador
 
 class Estado:
     """
