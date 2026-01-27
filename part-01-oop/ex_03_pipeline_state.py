@@ -208,7 +208,7 @@ class AgenteTransformador(AgenteBase):
         self.historico.append(resultado2)
         return resultado2
 
-# ----------------------------- #
+# -----------    ------------------ #
 
 class Estado:
     """
