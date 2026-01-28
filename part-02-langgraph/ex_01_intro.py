@@ -1,7 +1,7 @@
-"""
-Parte 2: LangGraph
+# Parte 2: LangGraph
+# 1. Introdução ao LangGraph
 
-1. Introdução ao LangGraph
+"""
 O LangGraph é a biblioteca para criar fluxos de IA que não são apenas uma 
 linha reta, mas sim um sistema com ciclos e decisões, onde múltiplos 
 agentes podem colaborar.
