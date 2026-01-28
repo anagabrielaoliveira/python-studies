@@ -7,17 +7,16 @@ Crie um grafo simples que processa pedidos de uma loja:
 Requisitos:
 
 Defina um Estado com:
+    pedido_id: str
+    valor: float
+    status: str
+    mensagens: lista de strings
 
-pedido_id: str
-valor: float
-status: str
-mensagens: lista de strings
 Crie três nós:
-
-receber_pedido: adiciona mensagem "Pedido recebido" e atualiza status para "recebido"
-calcular_desconto: se valor > 100, aplica 10% de desconto e adiciona mensagem
-finalizar: atualiza status para "finalizado" e adiciona mensagem
-Monte o grafo: receber → calcular → finalizar
+    receber_pedido: adiciona mensagem "Pedido recebido" e atualiza status para "recebido"
+    calcular_desconto: se valor > 100, aplica 10% de desconto e adiciona mensagem
+    finalizar: atualiza status para "finalizado" e adiciona mensagem
+    Monte o grafo: receber → calcular → finalizar
 """
 
 from typing import TypedDict
