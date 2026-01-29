@@ -170,5 +170,5 @@ print(f"Log: {resultado['log']}")
 # 9. Gerando imagem do fluxo na pasta
 png_data = graph.get_graph().draw_mermaid_png()
 
-with open("ex_04_fluxo.png", "wb") as f:
+with open("ex_04_imagem_fluxo.png", "wb") as f:
     f.write(png_data)
