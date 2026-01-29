@@ -1,89 +1,77 @@
 # Parte 3: LangGraph
 # 3. Fluxo Condicional
 
-"""
------- Arestas condicionais (add_conditional_edges) ------
-oermitem que o fluxo do agente seja dinâmico, decidindo qual será o próximo
-nó com base no estado atual do grafo
+# --------------------------------------------------
+# 3.1 Fluxo Condicional (add_conditional_edges)
+# --------------------------------------------------
+# Permitem que o fluxo do agente seja dinâmico, decidindo o próximo
+# nó com base no estado atual do grafo.
+#
+# Em vez de seguir um caminho fixo, define-se uma função de roteamento
+# que analisa a saída do nó anterior e retorna o destino.
+#
+# Componentes principais:
+# 1. Função de Roteamento: Recebe o State e retorna uma string.
+# 2. Mapeamento: Associa os retornos da função aos nós do grafo.
 
-Em vez de seguir um caminho fixo, você define uma função de roteamento que 
-analisa a saída do nó anterior e retorna o nome do próximo destino
+# --------------------------------------------------
+# 3.2 Funções de roteamento que retornam strings
+# --------------------------------------------------
+# A função recebe o State (dicionário de dados) e deve obrigatoriamente
+# retornar uma string. Essa string funciona como uma chave que o
+# LangGraph usará para decidir a direção.
+#
+# Exemplo de lógica:
+# def router_function(state: MyState):
+#     if "???" in state["messages"][-1].content:
+#         return "search_node"
+#     return "end"
 
-1. Função de Roteamento: uma função que recebe o State e retorna uma string 
-(o nome do próximo nó)
+# --------------------------------------------------
+# 3.3 Configurando o Grafo com Mapeamento
+# --------------------------------------------------
+# Ao adicionar arestas condicionais, conectamos o retorno da função
+# aos nomes reais dos nós registrados no workflow.
+#
+# workflow.add_conditional_edges(
+#     "node_anterior",     # Origem do fluxo
+#     router_function,     # Função de decisão
+#     {                    # Dicionário de mapeamento
+#         "search_node": "search", 
+#         "end": END
+#     }
+# )
 
-2. Mapeamento: Ao adicionar a aresta com add_conditional_edges, você associa
-retornos da função aos nós correspondentes do grafo
-
-workflow.add_conditional_edge(
-    from_node="Nó Atual",
-    to_node="Próximo Nó",
-    condition=lambda state: "Próximo Nó" if state["condição"] else "Outro Nó"
-)
-
------- Funções de roteamento que retornam strings ------
-A função recebe o State (o dicionário com os dados do seu agente) e deve 
-obrigatoriamente retornar uma string. Essa string funciona como uma chave
- que o LangGraph usará para decidir para onde ir
-
- # 1. A função de roteamento
-def router_function(state: MyState):
-    # Se a última mensagem contém uma pergunta, vai para o nó de pesquisa
-    if "???" in state["messages"][-1].content:
-        return "search_node"
-    # Caso contrário, encerra o fluxo
-    return "end"
-
-# 2. Configurando no Grafo
-workflow = StateGraph(MyState)
-
-workflow.add_conditional_edges(
-    "node_anterior",           # De onde o fluxo vem
-    router_function,           # A função que decide
-    {                          # O mapeamento (Retorno da função: Destino)
-        "search_node": "search", 
-        "end": END
-    }
-)
-
------- Como o grafo decide qual caminho seguir ------
-O LangGraph decide o caminho a seguir através de um sistema de "pergunta e 
-resposta" entre a aresta e o estado do grafo.
+# --------------------------------------------------
+# 3.4 O Sistema de "Pergunta e Resposta"
+# --------------------------------------------------
+# O LangGraph decide o caminho através de um ciclo de consulta:
+#
+# 1. Finalização: Um nó termina sua execução.
+# 2. Consulta: O grafo para e entrega o Estado Atual ao roteador.
+# 3. Resposta: A função devolve uma string indicando o próximo passo.
+# 4. Salto: O grafo consulta o mapeamento e move o fluxo para o destino.
 
 
-Quando um nó termina, o grafo não sabe para onde ir. Ele para e chama a função
-de roteamento, entregando a ela o Estado Atual do grafo. 
-
-A função analisa o estado e retorna uma string que indica o próximo nó.
-
-O grafo então consulta o mapeamento fornecido ao adicionar a aresta condicional,
-para saber onde vai o fluxo a seguir.
-
-"""
-"""
-3.3 Exercício:
-Crie um sistema de triagem de tickets de suporte:
-
-Requisitos:
-
-Estado com:
-
-ticket_id: str
-categoria: str (vazia inicialmente)
-prioridade: str (vazia inicialmente)
-descricao: str
-rota: lista de strings (para rastrear o caminho)
-Nós:
-
-classificar: analisa a descrição e define categoria ("tecnico", "financeiro", "geral")
-prioridade_alta: define prioridade como "alta" (para tickets técnicos)
-prioridade_normal: define prioridade como "normal" (demais casos)
-finalizar: adiciona "concluído" à rota
-Função de roteamento:
-
-Se categoria == "tecnico" → vai para prioridade_alta
-Caso contrário → vai para prioridade_normal
-"""
+# --------------------------------------------------
+# Exercício: Crie um sistema de triagem de tickets de suporte:
+#
+# - Requisitos:
+# -- Estado com:
+# ticket_id: str
+# categoria: str (vazia inicialmente)
+# prioridade: str (vazia inicialmente)
+# descricao: str
+# rota: lista de strings (para rastrear o caminho)
+# -- Nós:
+# classificar: analisa a descrição e define categoria ("tecnico", "financeiro", "geral")
+# prioridade_alta: define prioridade como "alta" (para tickets técnicos)
+# prioridade_normal: define prioridade como "normal" (demais casos)
+# finalizar: adiciona "concluído" à rota
+# -- Função de roteamento:
+# Se categoria == "tecnico" → vai para prioridade_alta
+# Caso contrário → vai para prioridade_normal
+# --------------------------------------------------
 
 from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
@@ -131,6 +119,7 @@ def finalizar(state:Estado):
         'rota': state['rota'] + ["concluído"]
     }
 
+# 3. Função de roteamento (router)
 def roteamento(state:Estado):
     """
     Se categoria == "tecnico" → vai para prioridade_alta
@@ -142,16 +131,16 @@ def roteamento(state:Estado):
     else:
         return "normal"
 
-# 3. Montando o Grafo
+# 4. Montando o Grafo
 workflow = StateGraph(Estado)
 
-# 4. Adicionando os Nós (Passos)
+# 5. Adicionando os Nós (Passos)
 workflow.add_node("classificar", classificar)
 workflow.add_node("prioridade_normal", prioridade_normal)
 workflow.add_node("prioridade_alta", prioridade_alta)
 workflow.add_node("finalizar", finalizar)
 
-# 5. Adicionando as Arestas (Fluxo)
+# 6. Adicionando as Arestas (Fluxo)
 workflow.add_edge(START, "classificar")     
 
 workflow.add_conditional_edges(
@@ -169,10 +158,10 @@ workflow.add_edge("prioridade_alta", "finalizar")
 
 workflow.add_edge("finalizar", END)
 
-# 6. Compilando o Grafo
+# 7. Compilando o Grafo
 graph = workflow.compile()
 
-# 7. Teste
+# 8. Teste
 
 # Teste 1: Ticket técnico
 ticket1 = {
