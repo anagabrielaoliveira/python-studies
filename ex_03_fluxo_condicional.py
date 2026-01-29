@@ -1,7 +1,6 @@
 # Parte 3: LangGraph
 # 3. Fluxo Condicional
 
-
 """
 ------ Arestas condicionais (add_conditional_edges) ------
 oermitem que o fluxo do agente seja dinâmico, decidindo qual será o próximo
@@ -132,6 +131,7 @@ def finalizar(state:Estado):
         'rota': state['rota'] + ["concluído"]
     }
 
+# 3. Função de roteamento (router)
 def roteamento(state:Estado):
     """
     Se categoria == "tecnico" → vai para prioridade_alta
@@ -143,16 +143,16 @@ def roteamento(state:Estado):
     else:
         return "normal"
 
-# 3. Montando o Grafo
+# 4. Montando o Grafo
 workflow = StateGraph(Estado)
 
-# 4. Adicionando os Nós (Passos)
+# 5. Adicionando os Nós (Passos)
 workflow.add_node("classificar", classificar)
 workflow.add_node("prioridade_normal", prioridade_normal)
 workflow.add_node("prioridade_alta", prioridade_alta)
 workflow.add_node("finalizar", finalizar)
 
-# 5. Adicionando as Arestas (Fluxo)
+# 6. Adicionando as Arestas (Fluxo)
 workflow.add_edge(START, "classificar")     
 
 workflow.add_conditional_edges(
@@ -170,10 +170,10 @@ workflow.add_edge("prioridade_alta", "finalizar")
 
 workflow.add_edge("finalizar", END)
 
-# 6. Compilando o Grafo
+# 7. Compilando o Grafo
 graph = workflow.compile()
 
-# 7. Teste
+# 8. Teste
 
 # Teste 1: Ticket técnico
 ticket1 = {
