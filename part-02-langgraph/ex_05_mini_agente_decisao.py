@@ -160,8 +160,9 @@ carrinho2 = {
 
 carrinho3 = {
     'itens': [
-        {'nome': 'Alface', 'preco': 3.0, 'quantidade': 1000000000}, # Corrigir
-        {'nome': 'Peixe', 'preco': 30, 'quantidade': 3},
+        {'nome': 'Monster', 'preco': 8.99, 'quantidade': 5},
+        {'nome': 'Café', 'preco': 25, 'quantidade': 3},
+        {'nome': 'Abacate', 'preco': -9, 'quantidade': 1}
     ],
     'total': 0.0,
     'cupom': None,
@@ -172,10 +173,10 @@ carrinho3 = {
 }
 
 resultado1 = graph.invoke(carrinho1)
-print(f"Carrinho 1 - Status: {resultado1['status']}, Total: {resultado1['total']}")
+print(f"Carrinho 1 - Status: {resultado1['status']}, Total: {resultado1['total']}, Problemas: {resultado1['problemas']}")
 
 resultado2 = graph.invoke(carrinho2)
-print(f"Carrinho 2 - Status: {resultado2['status']}, Problemas: {resultado2['problemas']}")
+print(f"Carrinho 2 - Status: {resultado2['status']}, Total: {resultado2['total']}, Problemas: {resultado2['problemas']}")
 
 resultado3 = graph.invoke(carrinho3)
 print(f"Carrinho 3 - Status: {resultado3['status']}, Total: {resultado3['total']}, Problemas: {resultado3['problemas']}")
