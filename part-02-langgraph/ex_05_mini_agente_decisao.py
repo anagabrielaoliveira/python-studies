@@ -67,7 +67,8 @@ def verificar_estoque(state: Estado):
         estoque = item['quantidade']
         if estoque > 5:
             return {
-                'problemas': [f"Estoque insuficiente para {item['nome']}"] 
+                'problemas': [f"Estoque insuficiente para {item['nome']}"],
+                'total': item['preco'] * 0.0
             }
     return {
         'problemas': []
@@ -159,9 +160,8 @@ carrinho2 = {
 
 carrinho3 = {
     'itens': [
-        {'nome': 'Monster', 'preco': 8.99, 'quantidade': 7},
-        {'nome': 'Café', 'preco': 27.0, 'quantidade': 1},
-        {'nome': 'Abacate', 'preco': -2.0, 'quantidade': 3}
+        {'nome': 'Alface', 'preco': 3.0, 'quantidade': 1000000000}, # Corrigir
+        {'nome': 'Peixe', 'preco': 30, 'quantidade': 3},
     ],
     'total': 0.0,
     'cupom': None,
