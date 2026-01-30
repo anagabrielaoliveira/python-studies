@@ -1,5 +1,5 @@
-# Parte 3: LangGraph
-# 4 Ciclos e Iterações
+# Parte 2: LangGraph
+# Exercício: Ciclos e Iterações
 
 # --------------------------------------------------
 # 4.1 Como criar loops em LangGraph
@@ -20,6 +20,7 @@
 # --------------------------------------------------
 # É aqui que o loop infinito é evitado.
 # A função condicional lê o state["loop_count"] e decide
+
 # qual caminho o fluxo deve seguir.
 
 from typing import List, TypedDict
@@ -147,17 +148,17 @@ workflow.add_conditional_edges(
 graph = workflow.compile()
 
 # 8. Teste
-def processar(estado):
+"""def processar(estado):
     estado["tentativas"] += 1
     # Simula 50% de chance de sucesso
     estado["sucesso"] = random.random() > 0.5
-    return estado
+    return estado"""
 
 # Rode algumas vezes para ver comportamentos diferentes
 estado_inicial = {
     "tarefa": "Conectar ao banco de dados",
     "tentativas": 0,
-    "max_tentativas": 3,
+    "max_tentativas": 5,
     "sucesso": False,
     "log": []
 }
