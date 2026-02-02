@@ -5,6 +5,7 @@
 
 from typing import List, TypedDict, Optional
 from langgraph.graph import StateGraph, START, END
+# from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 
 # -------------- 0. Definindo o Estoque ------------- #
 ESTOQUE = {
@@ -62,20 +63,22 @@ def acessar_estoque(state: Estado):
                 item['quant_estoque'] = valor['quantidade_estoque']
                 break # próximo item
 
-    return state # retorna com as infos que 
+    return {
+        'itens': state['itens']
+    } # retorna com as infos que alterei
 
 def validar_itens(state: Estado):
     # Verifica se a lista existe
     if not state['itens']:
         state['problemas'].append(f"Não há produtos na lista")
-        # return state - quero que continue 
-
+        # return state - quero que continue
+         
     # Verifica se o preço é inválido
     for item in state['itens']:
         if item['preco'] < 0:
             state['problemas'].append(f"Produto {item['nome']} com preço inválido")
-            
-    return state # se nenhum erro desses 2 for encontrado, vamos ao próximo nó        
+          
+    return {'problemas': state['problemas']}        
 
 def calcular_total(state: Estado):
     # Calcula o valor total do pedido
@@ -83,8 +86,10 @@ def calcular_total(state: Estado):
     for item in state['itens']:
         soma_total += (item['preco'] * item['quant_sol'])
 
-    state['total'] = soma_total 
-    return state
+    # state['total'] = soma_total 
+    return {
+        'total': soma_total
+            }
 
 def aplicar_cupom(state: Estado):
     # Aplica cupom de desconto
@@ -95,18 +100,26 @@ def aplicar_cupom(state: Estado):
     return {
             'total': valor_final
         }
+# Como o estado ficou após o acessar_estoque:
+# state['itens'] = [
+#     {'nome': 'Monster', 'preco': 8.99, 'quant_estoque': 10, 'quant_sol': 2},
+#     {'nome': 'Café', 'preco': 15.0, 'quant_estoque': 5, 'quant_sol': 1}
+# ]
 
 def verificar_estoque(state: Estado):
     # Verifica se a quantidade solicitada é maior do que o estoque disponível
+    erros = []
+
     for item in state['itens']:
         if item['quant_sol'] > item['quant_estoque']:
-            return {
-                'problemas': [f"Estoque insuficiente para {item['nome']}"],
-                'total': item['preco'] * 0.0
-            }
-    return {
-    'problemas': []
-    }
+            erros.append(f"Estoque insuficiente para {item['nome']}")
+                
+    if erros:
+        return {
+            'problemas': erros,
+            'total': 0.0
+        }
+    return {'problemas': []} 
     
 def finalizar_compra(state: Estado):
      # Altera status para "concluído"
@@ -172,8 +185,8 @@ graph = workflow.compile()
 
 carrinho1 = {
     "itens": [
-        {"nome": "Camiseta", "quant_sol": 2},
-        {"nome": "Calça", "quant_sol": 3}
+        {"nome": "Camiseta", "quant_sol": 3},
+        {"nome": "Calça", "quant_sol": 2}
     ],
     "total": 0,
     "cupom": "DESC10",
@@ -185,7 +198,8 @@ carrinho1 = {
 
 carrinho2 = {
     "itens": [
-        {"nome": "Laptop", "quant_sol": 80}  
+        {"nome": "Laptop", "quant_sol": 80},  
+        {'nome': 'Monster',  'quant_sol': 80}
     ],
     "total": 0,
     "cupom": "",
