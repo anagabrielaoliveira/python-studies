@@ -5,7 +5,7 @@
 
 from typing import List, TypedDict, Optional
 from langgraph.graph import StateGraph, START, END
-# from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
+from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 
 # -------------- 0. Definindo o Estoque ------------- #
 ESTOQUE = {
@@ -16,7 +16,7 @@ ESTOQUE = {
     },
     "calca": {
         'nome_estoque': "Calça",
-        'preco_estoque': 200.0,
+        'preco_estoque': -200.0,
         'quantidade_estoque': 10
     },
     "laptop": {
@@ -32,14 +32,14 @@ ESTOQUE = {
 }
 
 # -------------- 1. Definindo o Estado ------------- #
-class Item(TypedDict):
+class Item(BaseModel):
     nome: str
-    preco: float
-    quant_estoque: int
-    quant_sol: int
+    preco: NonNegativeFloat
+    quant_estoque: NonNegativeInt
+    quant_sol: NonNegativeInt
 
 class Estado(TypedDict):
-    itens: List[Item] # lista de dicts [{'nome': 'Monster', 'preco': 8.99, ...}, {...}]
+    itens: List[Item] # lista de dicts 
     total: float
     cupom: Optional[str] # pode ser uma string ou None
     desconto_aplicado: float
@@ -50,49 +50,74 @@ class Estado(TypedDict):
 # -------------- 2. Nós -------------------------- #
 def acessar_estoque(state: Estado): 
     """
-    Através do nome do item, procuro qual a chave do meu estoque
-    associada a ele. Resgato o restante das informações a respeito do item 
-    e passo para state['itens']. Por fim, retorno as atualizaçõe ao meu estado
+    Mapeia o item solicitado ao ESTOQUE, extraindo nome, preço e quantidade 
+    disponível para processar a validação do pedido
     """
+    lista_itens = [] 
+
     for item in state['itens']:
-        nome_procurado = item['nome'] # Procurar o nome passado
+        if item['nome'] in ESTOQUE:
+            dados_item = ESTOQUE[item['nome']] 
 
-        for chave, valor in ESTOQUE.items():
-            if valor['nome_estoque'] == nome_procurado:
-                item['preco'] = valor['preco_estoque']
-                item['quant_estoque'] = valor['quantidade_estoque']
-                break # próximo item
+            try:
+                # validação do Pydantic é feita aqui
+                item_atualizado = Item(
+                                nome = dados_item['nome_estoque'],
+                                preco = dados_item['preco_estoque'],
+                                quant_estoque = dados_item['quantidade_estoque'],
+                                quant_sol = item['quant_sol']
+                                )
+                lista_itens.append(item_atualizado)
 
+            except ValueError:
+                # em caso de erro, o item não é adicionado a lista
+                state['problemas'].append(f"Produto {item['nome']} com preço/quantidade inconsistente")
+                
+        else: 
+            state['problemas'].append(f"Produto {item['nome']} não encontrado no estoque")
+    
     return {
-        'itens': state['itens']
-    } # retorna com as infos que alterei
+        'itens': lista_itens,
+        'problemas': state['problemas']
+    }      
 
 def validar_itens(state: Estado):
-    # Verifica se a lista existe
+    """
+    Verifica se a lista existe se o preço é inválido
+    """
+
+    # Se a lista vier vazia do nó anterior
     if not state['itens']:
-        state['problemas'].append(f"Não há produtos na lista")
-        # return state - quero que continue
-         
-    # Verifica se o preço é inválido
-    for item in state['itens']:
-        if item['preco'] < 0:
-            state['problemas'].append(f"Produto {item['nome']} com preço inválido")
-          
-    return {'problemas': state['problemas']}        
+        return {
+            'problemas': state['problemas']
+        }
+"""    
+    for item in state['itens']:  
+        if item.preco < 0:
+            state['problemas'].append(f"Produto {item.nome} com preço inválido")
+    return {
+        'problemas': state['problemas']
+    }  
+""" 
 
 def calcular_total(state: Estado):
-    # Calcula o valor total do pedido
+    """
+    Calcula o valor total do pedido
+    """
+    
     soma_total = 0
     for item in state['itens']:
-        soma_total += (item['preco'] * item['quant_sol'])
+        soma_total += (item.preco * item.quant_sol)
 
-    # state['total'] = soma_total 
     return {
         'total': soma_total
-            }
+        }
 
 def aplicar_cupom(state: Estado):
-    # Aplica cupom de desconto
+    """
+    Aplica cupom de desconto
+    """
+    
     if state['cupom'] == "DESC10":
         valor_final = state['total'] * 0.9
     else:
@@ -100,37 +125,38 @@ def aplicar_cupom(state: Estado):
     return {
             'total': valor_final
         }
-# Como o estado ficou após o acessar_estoque:
-# state['itens'] = [
-#     {'nome': 'Monster', 'preco': 8.99, 'quant_estoque': 10, 'quant_sol': 2},
-#     {'nome': 'Café', 'preco': 15.0, 'quant_estoque': 5, 'quant_sol': 1}
-# ]
 
 def verificar_estoque(state: Estado):
-    # Verifica se a quantidade solicitada é maior do que o estoque disponível
-    erros = []
+    """
+    Verifica se a quantidade solicitada é maior do que o estoque 
+    disponível
+    """
 
     for item in state['itens']:
-        if item['quant_sol'] > item['quant_estoque']:
-            erros.append(f"Estoque insuficiente para {item['nome']}")
-                
-    if erros:
-        return {
-            'problemas': erros,
-            'total': 0.0
-        }
-    return {'problemas': []} 
+        if item.quant_sol > item.quant_estoque:
+            state['problemas'].append(f"Estoque insuficiente para {item.nome}")
+
+    return {
+        'problemas': state['problemas']
+    } 
     
 def finalizar_compra(state: Estado):
-     # Altera status para "concluído"
+     """
+     Altera status para "concluído"
+     """
+
      return {
           'status': "concluído"
      }
 
 def cancelar(state: Estado):
-     # Altera status para "cancelado"
+     """
+     Altera status para "cancelado"
+     """
+     
      return {
-          'status': "cancelado"
+          'status': "cancelado",
+          'total': 0.0
      }
 
 def roteamento(state: Estado):
@@ -185,8 +211,8 @@ graph = workflow.compile()
 
 carrinho1 = {
     "itens": [
-        {"nome": "Camiseta", "quant_sol": 3},
-        {"nome": "Calça", "quant_sol": 2}
+        {'nome': "cafe", "quant_sol": 3},
+        {'nome': "calca", "quant_sol": 2}
     ],
     "total": 0,
     "cupom": "DESC10",
@@ -198,8 +224,8 @@ carrinho1 = {
 
 carrinho2 = {
     "itens": [
-        {"nome": "Laptop", "quant_sol": 80},  
-        {'nome': 'Monster',  'quant_sol': 80}
+        {"nome": "laptop", "quant_sol": 80},  
+        {"nome": 'monster', "quant_sol": 80}
     ],
     "total": 0,
     "cupom": "",
@@ -211,7 +237,7 @@ carrinho2 = {
 
 carrinho3 = {
     'itens': [
-        {'nome': 'Monster',  'quant_sol': 5}
+        {"nome": 'monster', "quant_sol": 5}
     ],
     'total': 0.0,
     'cupom': None,
