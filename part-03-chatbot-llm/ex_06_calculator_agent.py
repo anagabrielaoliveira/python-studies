@@ -22,7 +22,7 @@ from typing import TypedDict, List
 from langgraph.graph import StateGraph, END, START
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
-from langchain_core.tools import tool
+
 
 # HumanMessage(content = "Pergunta")
 # AIMessage(content = "Resposta")
@@ -47,35 +47,7 @@ def processar_entrada(estado: EstadoChat):
     # Adiciona mensagem do usuário ao histórico
     return estado # recebo o estado como ele foi definido em chat()
 
-@tool
-def calculadora_simples(
-    escolha: str, 
-    entrada_1: float, 
-    entrada_2: float,
-    ) -> str:
-    """
-    Útil para realizar cálculos matemáticos básicos. 
-    Argumentos:
-    - escolha: A operação desejada (soma, subtracao, multiplicacao, divisao).
-    - entrada_1: O primeiro número.
-    - entrada_2: O segundo número.
-    """
-    
-    operacoes = {
-        'soma': entrada_1 + entrada_2, 
-        'subtracao': entrada_1 - entrada_2,
-        'divisao' : entrada_1 / entrada_2,
-        'multiplicacao': entrada_1 * entrada_2
-    }
-    
-    resultado = operacoes.get(escolha)
 
-    return {
-        'resposta_atual':
-        f"A {escolha} de {entrada_1} com {entrada_2} é igual a {resultado}" }
-
-
-#tool_node = ToolNode([calculadora_simples]) # nó do grafo
 
 def gerar_resposta(estado: EstadoChat): 
     llm = ChatOpenAI(model="gpt-3.5-turbo") 
