@@ -24,8 +24,8 @@ graph.add_conditional_edges(
     }
 )
 
-# graph.add_edge('usar_ferramenta', 'salvar_resposta')   
-# graph.add_edge('salvar_resposta', END)  
+# graph.add_edge('gerar_resposta', 'salvar_resposta')   
+#graph.add_edge('salvar_resposta', END)  
 graph.add_edge('usar_ferramenta', END) 
 
 # --------------- Compile ---------------- #

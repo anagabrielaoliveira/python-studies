@@ -2,6 +2,6 @@ from typing import TypedDict, List, Annotated
 import operator
 
 class EstadoChat(TypedDict):
-    mensagens: Annotated[List[dict], operator.add] 
+    mensagens: List[dict]
     resposta_atual: str
     contexto: str 
